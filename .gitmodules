@@ -1,0 +1,6 @@
+[submodule "src/archivematica"]
+	path = src/archivematica
+	url = git@github.com:artefactual/archivematica.git
+[submodule "src/archivematica-storage-service"]
+	path = src/archivematica-storage-service
+	url = https://github.com/artefactual/archivematica-storage-service.git
