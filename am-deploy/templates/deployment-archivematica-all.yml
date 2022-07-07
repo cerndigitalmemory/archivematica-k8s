@@ -31,7 +31,7 @@ spec:
         app.kubernetes.io/managed-by: helm
     spec:
       securityContext:
-        fsGroup: 1010690000
+        fsGroup: {{ .Values.general.user_uid }}
         fsGroupChangePolicy: "OnRootMismatch"
       serviceAccount: default
       serviceAccountName: default
@@ -39,8 +39,8 @@ spec:
         - image:  {{ .Values.archivematica_storage_service.image }}
           name: archivematica-storage-service
           securityContext:
-            runAsUser: 1010690000
-            runAsGroup: 1010690000
+            runAsUser: {{ .Values.general.user_uid }}
+            runAsGroup: {{ .Values.general.user_uid }}
           env:
             - name: SS_GUNICORN_BIND
               value: 0.0.0.0:8002
@@ -62,9 +62,9 @@ spec:
                   key: SS_DB_URL
                   name: env
             - name: SS_GUNICORN_USER
-              value: "1010690000"
+              value: "{{ .Values.general.user_uid }}"
             - name: SS_GUNICORN_GROUP
-              value: "1010690000"
+              value: "{{ .Values.general.user_uid }}"
             - name: SS_GUNICORN_LOGLEVEL
               value: "debug"
           ports:
@@ -90,8 +90,8 @@ spec:
         - image:  {{ .Values.archivematica_dashboard.image }}
           name: archivematica-dashboard 
           securityContext:
-            runAsUser: 1010690000
-            runAsGroup: 1010690000
+            runAsUser: {{ .Values.general.user_uid }}
+            runAsGroup: {{ .Values.general.user_uid }}
           env:
             - name: AM_GUNICORN_BIND 
               value: 0.0.0.0:8001
@@ -106,9 +106,9 @@ spec:
             - name: AM_GUNICORN_RELOAD_ENGINE
               value: auto
             - name: AM_GUNICORN_USER
-              value: "1010690000"
+              value: {{ .Values.general.user_uid | quote }}
             - name: AM_GUNICORN_GROUP
-              value: "1010690000"
+              value: {{ .Values.general.user_uid | quote }}
             - name: AM_GUNICORN_LOGLEVEL
               value: "debug"
             - name: AM_GUNICORN_WORKERS
@@ -143,8 +143,8 @@ spec:
         - image: {{ .Values.mcp_client.image }}
           name: archivematica-mcp-client
           securityContext:
-            runAsUser: 1010690000
-            runAsGroup: 1010690000
+            runAsUser: {{ .Values.general.user_uid }}
+            runAsGroup: {{ .Values.general.user_uid }}
           env:      
             - name: ARCHIVEMATICA_MCPCLIENT_MCPCLIENT_CAPTURE_CLIENT_SCRIPT_OUTPUT
               value: "true"           
@@ -214,8 +214,8 @@ spec:
         - image: {{ .Values.mcp_server.image }}
           name: archivematica-mcp-server
           securityContext:
-            runAsUser: 1010690000
-            runAsGroup: 1010690000     
+            runAsUser: {{ .Values.general.user_uid }}
+            runAsGroup: {{ .Values.general.user_uid }}    
           env:            
             - name: DJANGO_SECRET_KEY
               value: "12345"
@@ -316,8 +316,8 @@ spec:
         - image:  {{ .Values.archivematica_storage_service.image }}
           name: archivematica-storage-service-migrations
           securityContext:
-            runAsUser: 1010690000
-            runAsGroup: 1010690000
+            runAsUser: {{ .Values.general.user_uid }}
+            runAsGroup: {{ .Values.general.user_uid }}
           command: ["sh"]
           args: ["-c","python /src/storage_service/manage.py migrate --noinput"]
           envFrom:
@@ -365,8 +365,8 @@ spec:
         - image:  {{ .Values.archivematica_storage_service.image }}
           name: archivematica-storage-service-create-user
           securityContext:
-            runAsUser: 1010690000
-            runAsGroup: 1010690000
+            runAsUser: {{ .Values.general.user_uid }}
+            runAsGroup: {{ .Values.general.user_uid }}
           envFrom:
             - secretRef:
                 name: archivematica-settings
@@ -434,8 +434,8 @@ spec:
         - image:  {{ .Values.archivematica_dashboard.image }}
           name: archivematica-dashboard-migration  
           securityContext:
-            runAsUser: 1010690000
-            runAsGroup: 1010690000 
+            runAsUser: {{ .Values.general.user_uid }}
+            runAsGroup: {{ .Values.general.user_uid }} 
           command: ["sh"]
           args: ["-c", "python /src/dashboard/src/manage.py migrate --noinput"]
           envFrom:

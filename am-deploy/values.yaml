@@ -2,6 +2,11 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+general:
+  # Pick this based on your project's allowed range
+  # (check the openshift.io/sa.scc.uid-range annotation)
+  user_uid: "1010720000"
+
 archivematica_storage_service:
   image: gitlab-registry.cern.ch/digitalmemory/archivematica-helm/archivematica-storage-service:dev
   # whitelist_source_range: "10.0.0.0/24","172.10.0.1"

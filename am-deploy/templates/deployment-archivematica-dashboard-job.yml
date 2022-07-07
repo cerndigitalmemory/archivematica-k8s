@@ -85,4 +85,6 @@ spec:
               value: archivematica
             - name: ARCHIVEMATICA_DASHBOARD_CLIENT_PASSWORD
               value: demo
+            - name: ARCHIVEMATICA_DASHBOARD_DASHBOARD_SEARCH_ENABLED
+              value: "false"
       restartPolicy: OnFailure
