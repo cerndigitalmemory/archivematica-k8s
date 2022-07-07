@@ -1,0 +1,96 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  labels:
+    app.kubernetes.io/name: mysql
+    app.kubernetes.io/instance: {{ .Release.Namespace }}
+    app.kubernetes.io/version: test    
+    app.kubernetes.io/managed-by: helm 
+    run: mysql
+spec:
+  ports:
+  - port: 3306
+    protocol: TCP
+  selector:
+    app: mysql
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - name: mysql
+          image: bitnami/mysql:5.7
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: 12345a
+            - name: MYSQL_DATABASE
+              value: archivematica_db
+            - name: MYSQL_USER
+              value: demo
+            - name: MYSQL_PASSWORD
+              value: demo
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+          - name: mysql-data
+            mountPath: /var/lib/mysql
+          # command: ["sh"]
+          # args: ["-c","mysql -uroot -e \"CREATE USER 'root'@'%' IDENTIFIED BY '12345a'; GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '12345a'; GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION; FLUSH PRIVILEGES; CREATE DATABASE IF NOT EXISTS archivematica_db;\""]
+      volumes:
+        - name: mysql-data
+          {{- if .Values.mysql.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: mysql-pv-claim
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+      restartPolicy: Always
+---
+{{- if .Values.mysql.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pv-claim
+  annotations:
+    "helm.sh/resource-policy": keep
+spec:
+  accessModes:
+    - ReadWriteOnce
+    - ReadWriteMany
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: {{ .Values.mysql.persistence.size }}
+  storageClassName: cephfs
+{{- end }}
+# ---
+# {{- if .Values.mysql.persistence.enabled }}
+# apiVersion: v1
+# kind: PersistentVolume
+# metadata:
+#   name: mysql-pv-volume
+#   labels:
+#     type: local
+# spec:
+#   storageClassName: manual
+#   capacity:
+#     storage: 10Gi
+#   accessModes:
+#     - ReadWriteOnce
+#   hostPath:
+#     path: "/mnt/data"
+# {{- end }}
