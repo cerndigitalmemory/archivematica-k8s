@@ -27,7 +27,10 @@ In this case, replace the `image` values in the `values.yaml`.
 
 ## Secrets
 
-TODO
+oc create secret generic \
+  --from-literal="MYSQL_ROOT_PASSWORD=12345" \
+  archivematica-settings
+
 
 ## Configuration
 
