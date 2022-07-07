@@ -31,8 +31,8 @@ mysql:
     size: 20Gi
 
 route:
-  hostname: ""
-  enabled: false
+  hostname: "dm-am-test.web.cern.ch"
+  enabled: true
   tls: true
 
 redis:
