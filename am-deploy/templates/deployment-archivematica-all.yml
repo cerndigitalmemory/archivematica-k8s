@@ -31,7 +31,7 @@ spec:
         app.kubernetes.io/managed-by: helm
     spec:
       securityContext:
-        fsGroup: {{ .Values.general.user_uid }}
+        fsGroup: 1010690000
         fsGroupChangePolicy: "OnRootMismatch"
       serviceAccount: default
       serviceAccountName: default
@@ -39,8 +39,8 @@ spec:
         - image:  {{ .Values.archivematica_storage_service.image }}
           name: archivematica-storage-service
           securityContext:
-            runAsUser: {{ .Values.general.user_uid }}
-            runAsGroup: {{ .Values.general.user_uid }}
+            runAsUser: 1010690000
+            runAsGroup: 1010690000
           env:
             - name: SS_GUNICORN_BIND
               value: 0.0.0.0:8002
@@ -62,15 +62,13 @@ spec:
                   key: SS_DB_URL
                   name: env
             - name: SS_GUNICORN_USER
-              value: "{{ .Values.general.user_uid }}"
+              value: "1010690000"
             - name: SS_GUNICORN_GROUP
-              value: "{{ .Values.general.user_uid }}"
+              value: "1010690000"
             - name: SS_GUNICORN_LOGLEVEL
               value: "debug"
           ports:
           - containerPort: 8002   
-          # command: ["sh"]
-          # args: ["-c","python -c 'import os;print(os.geteuid());print(os.getegid())' && ls -l"]      
           envFrom:
             - secretRef:
                 name: archivematica-settings
@@ -90,8 +88,8 @@ spec:
         - image:  {{ .Values.archivematica_dashboard.image }}
           name: archivematica-dashboard 
           securityContext:
-            runAsUser: {{ .Values.general.user_uid }}
-            runAsGroup: {{ .Values.general.user_uid }}
+            runAsUser: 1010690000
+            runAsGroup: 1010690000
           env:
             - name: AM_GUNICORN_BIND 
               value: 0.0.0.0:8001
@@ -106,9 +104,9 @@ spec:
             - name: AM_GUNICORN_RELOAD_ENGINE
               value: auto
             - name: AM_GUNICORN_USER
-              value: {{ .Values.general.user_uid | quote }}
+              value: "1010690000"
             - name: AM_GUNICORN_GROUP
-              value: {{ .Values.general.user_uid | quote }}
+              value: "1010690000"
             - name: AM_GUNICORN_LOGLEVEL
               value: "debug"
             - name: AM_GUNICORN_WORKERS
@@ -129,6 +127,10 @@ spec:
               value: archivematica
             - name: ARCHIVEMATICA_DASHBOARD_CLIENT_PASSWORD
               value: demo
+            - name: ARCHIVEMATICA_DASHBOARD_DASHBOARD_ELASTICSEARCH_SERVER
+              value: "es:9200"
+            - name: ARCHIVEMATICA_DASHBOARD_DASHBOARD_GEARMAN_SERVER
+              value: "archivematica-gearmand:4730"
           ports:
           - containerPort: 8001              
           envFrom:
@@ -143,8 +145,8 @@ spec:
         - image: {{ .Values.mcp_client.image }}
           name: archivematica-mcp-client
           securityContext:
-            runAsUser: {{ .Values.general.user_uid }}
-            runAsGroup: {{ .Values.general.user_uid }}
+            runAsUser: 1010690000
+            runAsGroup: 1010690000
           env:      
             - name: ARCHIVEMATICA_MCPCLIENT_MCPCLIENT_CAPTURE_CLIENT_SCRIPT_OUTPUT
               value: "true"           
@@ -175,7 +177,7 @@ spec:
             - name: ARCHIVEMATICA_MCPCLIENT_CLIENT_DATABASE
               value: "MCP"
             - name: ARCHIVEMATICA_MCPCLIENT_MCPCLIENT_ELASTICSEARCHSERVER
-              value: "elasticsearch:9200"
+              value: "es:9200"
             - name: ARCHIVEMATICA_MCPCLIENT_MCPCLIENT_MCPARCHIVEMATICASERVER
               value: "archivematica-gearmand:4730"
             - name: ARCHIVEMATICA_MCPCLIENT_MCPCLIENT_SEARCH_ENABLED
@@ -200,7 +202,7 @@ spec:
                   key: CLAMAV_MAX_STREAM_LENGTH
                   name: env
             - name: ARCHIVEMATICA_MCPCLIENT_MCPCLIENT_CLAMAV_CLIENT_BACKEND
-              value: clamdscanner   
+              value: clamscanner   
           envFrom:
             - secretRef:
                 name: archivematica-settings       
@@ -214,8 +216,8 @@ spec:
         - image: {{ .Values.mcp_server.image }}
           name: archivematica-mcp-server
           securityContext:
-            runAsUser: {{ .Values.general.user_uid }}
-            runAsGroup: {{ .Values.general.user_uid }}    
+            runAsUser: 1010690000
+            runAsGroup: 1010690000     
           env:            
             - name: DJANGO_SECRET_KEY
               value: "12345"
@@ -249,8 +251,11 @@ spec:
             - mountPath: /home/transfer
               name: {{ .Release.Namespace }}-transfer-share
              
-        - image: mailu/clamav:latest
+        - image: {{ .Values.clamvd.image }}
           name: clamavd
+          securityContext:
+            runAsUser: 1010690000
+            runAsGroup: 1010690000
           ports:
             - containerPort: 3310
           env:
@@ -280,19 +285,19 @@ spec:
             - mountPath: /var/archivematica/sharedDirectory
               name: {{ .Release.Namespace }}-pipeline-data
               readOnly: true
-            - mountPath: /etc/clamav
-              name: {{ .Release.Namespace }}-clamav-files
+            - mountPath: /data
+              name: {{ .Release.Namespace }}-clamav-data
+            - mountPath: /run
+              name: {{ .Release.Namespace }}-clamav-log
           {{- if .Values.freshclamConfig }}
-          volumeMounts:
-          - name: freshclam-config-volume
-            mountPath: /etc/clamav/freshclam.conf
-            subPath: freshclam.conf
+            - name: freshclam-config-volume
+              mountPath: /etc/clamav/freshclam.conf
+              subPath: freshclam.conf
           {{- end }}
           {{- if .Values.clamdConfig }}
-          volumeMounts:
-          - name: clamd-config-volume
-            mountPath: /etc/clamav/clamd.conf
-            subPath: clamd.conf
+            - name: clamd-config-volume
+              mountPath: /etc/clamav/clamd.conf
+              subPath: clamd.conf
           {{- end }}
 
 
@@ -316,8 +321,8 @@ spec:
         - image:  {{ .Values.archivematica_storage_service.image }}
           name: archivematica-storage-service-migrations
           securityContext:
-            runAsUser: {{ .Values.general.user_uid }}
-            runAsGroup: {{ .Values.general.user_uid }}
+            runAsUser: 1010690000
+            runAsGroup: 1010690000
           command: ["sh"]
           args: ["-c","python /src/storage_service/manage.py migrate --noinput"]
           envFrom:
@@ -365,8 +370,8 @@ spec:
         - image:  {{ .Values.archivematica_storage_service.image }}
           name: archivematica-storage-service-create-user
           securityContext:
-            runAsUser: {{ .Values.general.user_uid }}
-            runAsGroup: {{ .Values.general.user_uid }}
+            runAsUser: 1010690000
+            runAsGroup: 1010690000
           envFrom:
             - secretRef:
                 name: archivematica-settings
@@ -434,8 +439,8 @@ spec:
         - image:  {{ .Values.archivematica_dashboard.image }}
           name: archivematica-dashboard-migration  
           securityContext:
-            runAsUser: {{ .Values.general.user_uid }}
-            runAsGroup: {{ .Values.general.user_uid }} 
+            runAsUser: 1010690000
+            runAsGroup: 1010690000 
           command: ["sh"]
           args: ["-c", "python /src/dashboard/src/manage.py migrate --noinput"]
           envFrom:
@@ -503,16 +508,30 @@ spec:
           {{- else }}
           emptyDir: {}
           {{- end }}
-        - name: {{ .Release.Namespace }}-clamav-files
-          {{- if .Values.archivematica_storage_service.persistence.enabled }}
+        - name: {{ .Release.Namespace }}-clamav-etc
+          {{- if .Values.clamvd.persistence.enabled }}
           persistentVolumeClaim:
-            claimName: clamav-files
+            claimName: clamav-etc
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        - name: {{ .Release.Namespace }}-clamav-data
+          {{- if .Values.clamvd.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: clamav-data
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        - name: {{ .Release.Namespace }}-clamav-log
+          {{- if .Values.clamvd.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: clamav-log
           {{- else }}
           emptyDir: {}
           {{- end }}
         {{- if .Values.freshclamConfig }}
         - name: freshclam-config-volume
-          {{- if .Values.archivematica_storage_service.persistence.enabled }}
+          {{- if .Values.clamvd.persistence.enabled }}
           configMap:
             name: {{ .Release.Namespace }}-freshclam
           {{- else }}
@@ -521,7 +540,7 @@ spec:
         {{- end }}
         {{- if .Values.clamdConfig }}
         - name: clamd-config-volume
-          {{- if .Values.archivematica_storage_service.persistence.enabled }}
+          {{- if .Values.clamvd.persistence.enabled }}
           configMap:
             name: {{ .Release.Namespace }}-clamd
           {{- else }}
@@ -651,10 +670,10 @@ metadata:
 spec:  
   tls:
   - hosts:
-    - "localhost"
+    - "am-deploy.web.cern.ch"
     secretName: archivematica-dashboard
   rules:
-  - host: "localhost"
+  - host: "am-deploy.web.cern.ch"
     http:
       paths:           
       - path: /
@@ -787,7 +806,43 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: clamav-files
+  name: clamav-data
+  annotations:
+    "helm.sh/resource-policy": keep
+spec:
+  accessModes:
+    - ReadWriteOnce
+    - ReadWriteMany
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: cephfs-ssd
+{{- end }}
+---
+{{- if .Values.archivematica_storage_service.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: clamav-log
+  annotations:
+    "helm.sh/resource-policy": keep
+spec:
+  accessModes:
+    - ReadWriteOnce
+    - ReadWriteMany
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: {{ .Values.archivematica_storage_service.persistence.size }}
+  storageClassName: cephfs-ssd
+{{- end }}
+---
+{{- if .Values.archivematica_storage_service.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: clamav-etc
   annotations:
     "helm.sh/resource-policy": keep
 spec:
