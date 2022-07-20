@@ -6,6 +6,11 @@ Helm charts to deploy [Archivematica](https://www.archivematica.org/) on a Kuber
 
 We target **Archivematica 1.13.x** and **Archivematica Storage Service 0.19.x**.
 
+## Usage
+
+[Helm](https://helm.sh) must be installed to use the charts.
+Please refer to Helm's [documentation](https://helm.sh/docs/) to get started.
+
 ## Docker images
 
 You shouldn't need anything different here, as the provided `values.yaml` is set to use the docker images we build and push to our [container registry](https://gitlab.cern.ch/digitalmemory/archivematica-helm/container_registry).
@@ -30,7 +35,7 @@ In this case, replace the `image` values in the `values.yaml`.
 
 ## OpenShift project
 
-Create an OpenShift projec
+Create an OpenShift project.
 
 ## Configuration
 
