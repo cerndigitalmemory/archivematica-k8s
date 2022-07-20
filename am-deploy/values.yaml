@@ -5,7 +5,7 @@
 general:
   # Pick this based on your project's allowed range
   # (check the openshift.io/sa.scc.uid-range annotation)
-  user_uid: "1010720000"
+  user_uid: "1010440000"
 
 archivematica_storage_service:
   image: gitlab-registry.cern.ch/digitalmemory/archivematica-helm/archivematica-storage-service:dev
@@ -30,8 +30,14 @@ mysql:
     enabled: true
     size: 20Gi
 
+clamvd:
+  image: gitlab-registry.cern.ch/digitalmemory/archivematica-helm/am-clamav:dev
+  persistence:
+    enabled: true
+
 route:
   hostname: "dm-am-test.web.cern.ch"
+  ss-hostname: "am-deploy2.web.cern.ch"
   enabled: true
   tls: true
 
@@ -44,71 +50,3 @@ gearmand:
   queue_type: redis
   redis_server: archivematica-redis
   redis_port: 6379
-
-#Use freshclamConfig to define the content of /etc/clamav/freshclam.conf. Example:
-freshclamConfig: |
-  DatabaseOwner clamav
-  UpdateLogFile /var/log/clamav/freshclam.log
-  LogVerbose false
-  LogSyslog false
-  LogFacility LOG_LOCAL6
-  LogFileMaxSize 0
-  LogRotate true
-  LogTime true
-  Foreground true
-  Debug false
-  MaxAttempts 5
-  DatabaseDirectory /var/lib/clamav
-  DNSDatabaseInfo current.cvd.clamav.net
-  ConnectTimeout 30
-  ReceiveTimeout 30
-  TestDatabases yes
-  ScriptedUpdates yes
-  CompressLocalDatabase no
-  SafeBrowsing false
-  Bytecode true
-  NotifyClamd /etc/clamav/clamd.conf
-  Checks 24
-  DatabaseMirror db.local.clamav.net
-  DatabaseMirror database.clamav.net
-
-
-clamdConfig: |
-  DatabaseDirectory /var/lib/clamav
-  TemporaryDirectory /tmp
-  LogTime yes
-  PidFile /run/clamd.pid
-  LocalSocket /tmp/clamd.sock
-  TCPSocket 3310
-  Foreground yes
-
-  DetectPUA yes
-  ExcludePUA NetTool
-  ExcludePUA PWTool
-  Bytecode yes
-
-  ScanPE yes
-  DisableCertCheck yes
-  ScanELF yes
-  ScanOLE2 yes
-  ScanPDF yes
-  ScanSWF yes
-  ScanMail yes
-  PhishingSignatures yes
-  PhishingScanURLs yes
-  ScanHTML yes
-  ScanArchive yes
-
-  MaxScanSize 150M
-  MaxFileSize 30M
-  MaxRecursion 10
-  MaxFiles 15000
-  MaxEmbeddedPE 10M
-  MaxHTMLNormalize 10M
-  MaxHTMLNoTags 2M
-  MaxScriptNormalize 5M
-  MaxZipTypeRcg 1M
-  MaxPartitions 128
-  MaxIconsPE 200
-  PCREMatchLimit 10000
-  PCRERecMatchLimit 10000
