@@ -37,6 +37,7 @@ clamvd:
 
 route:
   hostname: "dm-am-test.web.cern.ch"
+  ss-hostname: "am-deploy2.web.cern.ch"
   enabled: true
   tls: true
 

@@ -21,13 +21,13 @@ spec:
         app.kubernetes.io/managed-by: helm 
     spec:
       securityContext:
-        fsGroup: 1010690000
+        fsGroup: {{ .Values.general.user_uid }}
       containers:
         - image: artefactual/gearmand:1.1.17-alpine
           name: gearmand   
           securityContext:
-            runAsUser: 1010690000
-            runAsGroup: 1010690000
+            runAsUser: {{ .Values.general.user_uid }}
+            runAsGroup: {{ .Values.general.user_uid }}
           args:
             - --queue-type={{ .Values.gearmand.queue_type }}
             - --redis-server={{ .Values.gearmand.redis_server }}
