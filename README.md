@@ -2,7 +2,7 @@
 
 Helm charts to deploy [Archivematica](https://www.archivematica.org/) on a Kubernetes cluster.
 
-> This setup makes use of some CERN specific technology (EOS volume mounts, SSO) and it's designed for a k8s cluster orchestrated by OpenShift. You may need some modification to make this work on a different stack (e.g. minikube).
+> No managed instances are used (MySQL pods are deployed and standard volumes are used for storage) so this should provide a quite generic setup.
 
 We target **Archivematica 1.13.x** and **Archivematica Storage Service 0.19.x**.
 
@@ -56,9 +56,9 @@ oc create secret generic \
 
 You shouldn't need anything different here, as the provided `values.yaml` is set to use the docker images we build and push to our [container registry](https://gitlab.cern.ch/digitalmemory/archivematica-helm/container_registry).
 
-Archivematica images are unmodified versions from the upstream repositories, which are copied here as git submodules (check the `src` folders) and pinned to our target versions.
-
-More images are used (e.g. MySQL, Elastic, ..). For those, we use standard images published on canonical registries.
+- Archivematica images are unmodified versions from the upstream repositories, which are copied here as git submodules (check the `src` folders) and pinned to our target versions;
+- The ClamAV image is a slightly modified version of the [base](https://github.com/Mailu/Mailu/tree/master/optional/clamav) one, we just added permissions on some common folders so the resulting container won't need to run under `root` (as we user will be the one set in `values.yaml` -> `general/user_uid`);
+- More images are used (e.g. MySQL, Elastic, ..). For those, we use standard images published on canonical registries.
 
 ### Build
 
