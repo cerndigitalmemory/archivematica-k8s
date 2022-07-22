@@ -5,11 +5,10 @@
 general:
   # Pick this based on your project's allowed range
   # (check the openshift.io/sa.scc.uid-range annotation)
-  user_uid: "1010440000"
+  user_uid: "1007090000"
 
 archivematica_storage_service:
   image: gitlab-registry.cern.ch/digitalmemory/archivematica-helm/archivematica-storage-service:dev
-  # whitelist_source_range: "10.0.0.0/24","172.10.0.1"
   persistence:
     enabled: true
     size: 2Gi
@@ -36,8 +35,8 @@ clamvd:
     enabled: true
 
 route:
-  hostname: "dm-am-test.web.cern.ch"
-  ss-hostname: "am-deploy2.web.cern.ch"
+  hostname: "dm-am-test0.web.cern.ch"
+  hostname_ss: "dm-am-test-ss.web.cern.ch"
   enabled: true
   tls: true
 
