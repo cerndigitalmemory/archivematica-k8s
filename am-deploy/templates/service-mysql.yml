@@ -40,16 +40,18 @@ spec:
             - name: MYSQL_DATABASE
               value: archivematica_db
             - name: MYSQL_USER
-              value: demo
+              value: archivematica  
             - name: MYSQL_PASSWORD
-              value: demo
+              value: archivematica
           ports:
             - containerPort: 3306
           volumeMounts:
           - name: mysql-data
             mountPath: /var/lib/mysql
-          # command: ["sh"]
-          # args: ["-c","mysql -uroot -e \"CREATE USER 'root'@'%' IDENTIFIED BY '12345a'; GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '12345a'; GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION; FLUSH PRIVILEGES; CREATE DATABASE IF NOT EXISTS archivematica_db;\""]
+          volumeMounts:
+          - name: mysql-initdb
+            mountPath: /docker-entrypoint-initdb.d
+        
       volumes:
         - name: mysql-data
           {{- if .Values.mysql.persistence.enabled }}
@@ -58,6 +60,9 @@ spec:
           {{- else }}
           emptyDir: {}
           {{- end }}
+        - name: mysql-initdb
+          configMap:
+            name: mysql-initdb-config
       restartPolicy: Always
 ---
 {{- if .Values.mysql.persistence.enabled }}
@@ -77,20 +82,15 @@ spec:
       storage: {{ .Values.mysql.persistence.size }}
   storageClassName: cephfs
 {{- end }}
-# ---
-# {{- if .Values.mysql.persistence.enabled }}
-# apiVersion: v1
-# kind: PersistentVolume
-# metadata:
-#   name: mysql-pv-volume
-#   labels:
-#     type: local
-# spec:
-#   storageClassName: manual
-#   capacity:
-#     storage: 10Gi
-#   accessModes:
-#     - ReadWriteOnce
-#   hostPath:
-#     path: "/mnt/data"
-# {{- end }}
+---
+# MySQL reads initialization files from /docker-entrypoint-initdb.d
+# We mount the initialization commands using volumeMounts and volumes
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-initdb-config
+data:
+  initdb.sql: |
+   CREATE DATABASE IF NOT EXISTS MCP; 
+   GRANT ALL PRIVILEGES ON MCP.* TO 'archivematica'@'%' WITH GRANT OPTION; 
+   FLUSH PRIVILEGES;

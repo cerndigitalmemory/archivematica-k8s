@@ -4,7 +4,7 @@ metadata:
   name: archivematica-dashboard-init-job
   namespace: {{ .Release.Namespace }}
 spec:
-  backoffLimit: 1
+  backoffLimit: 5
   template:
     spec:
       containers:
@@ -73,18 +73,23 @@ spec:
                 configMapKeyRef:
                   key: AM_DASHBOARD_SITE_URL
                   name: env
+            - name: SS_DB_URL
+              valueFrom:
+                configMapKeyRef:
+                  key: SS_DB_URL
+                  name: env
             - name: ARCHIVEMATICA_DASHBOARD_EMAIL_PORT
               value: "587"
             - name: ARCHIVEMATICA_DASHBOARD_CLIENT_PORT
               value: "3306"
             - name: ARCHIVEMATICA_DASHBOARD_CLIENT_DATABASE
-              value: "MCP"
+              value: MCP
             - name: ARCHIVEMATICA_DASHBOARD_CLIENT_HOST
               value: mysql
             - name: ARCHIVEMATICA_DASHBOARD_CLIENT_USER
               value: archivematica
             - name: ARCHIVEMATICA_DASHBOARD_CLIENT_PASSWORD
-              value: demo
+              value: archivematica
             - name: ARCHIVEMATICA_DASHBOARD_DASHBOARD_SEARCH_ENABLED
               value: "false"
       restartPolicy: OnFailure
