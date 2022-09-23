@@ -5,7 +5,7 @@
 general:
   # Pick this based on your project's allowed range
   # (check the openshift.io/sa.scc.uid-range annotation)
-  user_uid: "1010440000"
+  user_uid: "1010690000"
 
 archivematica_storage_service:
   image: gitlab-registry.cern.ch/digitalmemory/archivematica-helm/archivematica-storage-service:dev
@@ -25,7 +25,7 @@ mcp_server:
 
 mysql:
   db: archivematica_db
-  ss_db_url: "mysql://root@mysql:3306"
+  ss_db_url: "mysql://archivematica:archivematica@mysql:3306/archivematica_db"
   persistence:
     enabled: true
     size: 20Gi
@@ -36,8 +36,8 @@ clamvd:
     enabled: true
 
 route:
-  hostname: "dm-am-test.web.cern.ch"
-  ss-hostname: "am-deploy2.web.cern.ch"
+  hostname: "dm-am.web.cern.ch"
+  ss_hostname: "http://am-deploy2.web.cern.ch"
   enabled: true
   tls: true
 

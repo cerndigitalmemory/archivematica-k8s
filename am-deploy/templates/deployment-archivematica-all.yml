@@ -120,13 +120,13 @@ spec:
             - name: ARCHIVEMATICA_DASHBOARD_CLIENT_PORT
               value: "3306"
             - name: ARCHIVEMATICA_DASHBOARD_CLIENT_DATABASE
-              value: "MCP"
+              value: MCP
             - name: ARCHIVEMATICA_DASHBOARD_CLIENT_HOST
               value: mysql
             - name: ARCHIVEMATICA_DASHBOARD_CLIENT_USER
               value: archivematica
             - name: ARCHIVEMATICA_DASHBOARD_CLIENT_PASSWORD
-              value: demo
+              value: archivematica
             - name: ARCHIVEMATICA_DASHBOARD_DASHBOARD_ELASTICSEARCH_SERVER
               value: "es:9200"
             - name: ARCHIVEMATICA_DASHBOARD_DASHBOARD_GEARMAN_SERVER
@@ -147,9 +147,7 @@ spec:
           securityContext:
             runAsUser: {{ .Values.general.user_uid }}
             runAsGroup: {{ .Values.general.user_uid }}
-          env:      
-            - name: ARCHIVEMATICA_MCPCLIENT_MCPCLIENT_CAPTURE_CLIENT_SCRIPT_OUTPUT
-              value: "true"           
+          env:               
             - name: DJANGO_SECRET_KEY
               value: "12345"
             - name: DJANGO_SETTINGS_MODULE
@@ -171,11 +169,11 @@ spec:
             - name: ARCHIVEMATICA_MCPCLIENT_CLIENT_USER
               value: archivematica
             - name: ARCHIVEMATICA_MCPCLIENT_CLIENT_PASSWORD
-              value: demo
+              value: archivematica
             - name: ARCHIVEMATICA_MCPCLIENT_CLIENT_HOST
               value: mysql
             - name: ARCHIVEMATICA_MCPCLIENT_CLIENT_DATABASE
-              value: "MCP"
+              value: MCP
             - name: ARCHIVEMATICA_MCPCLIENT_MCPCLIENT_ELASTICSEARCHSERVER
               value: "es:9200"
             - name: ARCHIVEMATICA_MCPCLIENT_MCPCLIENT_MCPARCHIVEMATICASERVER
@@ -226,11 +224,11 @@ spec:
             - name: ARCHIVEMATICA_MCPSERVER_CLIENT_USER
               value: archivematica
             - name: ARCHIVEMATICA_MCPSERVER_CLIENT_PASSWORD
-              value: demo
+              value: archivematica
             - name: ARCHIVEMATICA_MCPSERVER_CLIENT_HOST
               value: mysql
             - name: ARCHIVEMATICA_MCPSERVER_CLIENT_DATABASE
-              value: "MCP"
+              value: MCP
             - name: ARCHIVEMATICA_MCPSERVER_MCPSERVER_MCPARCHIVEMATICASERVER
               value: "archivematica-gearmand:4730"
             - name: ARCHIVEMATICA_MCPSERVER_SEARCH_ENABLED
@@ -453,13 +451,13 @@ spec:
             - name: ARCHIVEMATICA_DASHBOARD_CLIENT_PORT
               value: "3306"
             - name: ARCHIVEMATICA_DASHBOARD_CLIENT_DATABASE
-              value: "MCP"
+              value: MCP
             - name: ARCHIVEMATICA_DASHBOARD_CLIENT_HOST
               value: mysql
             - name: ARCHIVEMATICA_DASHBOARD_CLIENT_USER
               value: archivematica
             - name: ARCHIVEMATICA_DASHBOARD_CLIENT_PASSWORD
-              value: demo
+              value: archivematica
       restartPolicy: Always
       nodeSelector:
         kubernetes.io/os: linux  
