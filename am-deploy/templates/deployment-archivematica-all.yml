@@ -654,10 +654,10 @@ metadata:
 spec:  
   tls:
   - hosts:
-    - "am-deploy.web.cern.ch"
+    - {{ .Values.route.hostname }}
     secretName: archivematica-dashboard
   rules:
-  - host: "am-deploy.web.cern.ch"
+  - host: {{ .Values.route.hostname }}
     http:
       paths:           
       - path: /
