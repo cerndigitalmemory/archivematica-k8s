@@ -5,11 +5,10 @@
 general:
   # Pick this based on your project's allowed range
   # (check the openshift.io/sa.scc.uid-range annotation)
-  user_uid: "1010690000"
+  user_uid: "1007090000"
 
 archivematica_storage_service:
   image: gitlab-registry.cern.ch/digitalmemory/archivematica-helm/archivematica-storage-service:dev
-  # whitelist_source_range: "10.0.0.0/24","172.10.0.1"
   persistence:
     enabled: true
     size: 2Gi
@@ -25,7 +24,7 @@ mcp_server:
 
 mysql:
   db: archivematica_db
-  ss_db_url: "mysql://archivematica:archivematica@mysql:3306/archivematica_db"
+  ss_db_url: "mysql://root@mysql:3306"
   persistence:
     enabled: true
     size: 20Gi
