@@ -29,6 +29,8 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Namespace }}
         app.kubernetes.io/version: test    
         app.kubernetes.io/managed-by: helm
+      annotations:
+        eos.okd.cern.ch/mount-eos-with-credentials-from-secret: "eos-credentials"
     spec:
       securityContext:
         fsGroup: {{ .Values.general.user_uid }}
@@ -818,4 +820,24 @@ spec:
     requests:
       storage: {{ .Values.archivematica_storage_service.persistence.size }}
   storageClassName: cephfs-ssd
+{{- end }}
+---
+{{- if .Values.archivematica_storage_service.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: eos-volume
+  annotations:
+    "helm.sh/resource-policy": keep
+    volume.beta.kubernetes.io/storage-provisioner: eos-volume-provisioner.webservices.cern.ch
+spec:
+  accessModes:
+    - ReadWriteOnce
+    - ReadWriteMany
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: {{ .Values.archivematica_storage_service.persistence.size }}
+  storageClassName: eos
+  volumeMode: Filesystem
 {{- end }}

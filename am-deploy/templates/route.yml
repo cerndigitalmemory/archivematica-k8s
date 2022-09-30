@@ -6,7 +6,7 @@ kind: Route
 metadata:
   name: am-route-ss
 spec:
-  host: {{ .Values.route.hostname_ss }}
+  host: {{ .Values.route.ss_hostname }}
   to:
     kind: Service
     name: archivematica-storage-service

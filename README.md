@@ -29,7 +29,7 @@ Most of the configuration values can be set in `values.yaml`. Depending on your 
 | Value             | Description                                               |
 | ----------------- | --------------------------------------------------------- |
 | route/hostname    | Hostname for the Dashboard                                |
-| route/hostname_ss | Hostname for the Storage Service                          |
+| route/ss_hostname | Hostname for the Storage Service                          |
 | general/user_uid  | Pick this based on your OpenShift project's allowed range |
 
 Example values for hostname on CERN Openshift are `<NAME>.web.cern.ch`.
