@@ -51,7 +51,7 @@ oc create secret generic \
   archivematica-settings
 ```
 
-With this configuration you can log in to the dashboard with the username `archivematica` and password `demo`. And to the storage service with the username `archivematica` and password `archivematica`
+Note that two different users are created for the dashboard and the storage service.
 
 ## Docker images
 
