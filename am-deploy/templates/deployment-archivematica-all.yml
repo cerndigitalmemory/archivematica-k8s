@@ -151,7 +151,10 @@ spec:
             runAsGroup: {{ .Values.general.user_uid }}     
           env:            
             - name: DJANGO_SECRET_KEY
-              value: "12345"
+              valueFrom:
+                configMapKeyRef:
+                  key: DJANGO_SECRET_KEY
+                  name: archivematica-settings
             - name: DJANGO_SETTINGS_MODULE
               value: settings.common
             - name: ARCHIVEMATICA_MCPSERVER_CLIENT_USER
@@ -331,17 +334,17 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   key: AM_SS_USERNAME
-                  name: env
+                  name: archivematica-settings
             - name: AM_SS_PASSWORD
               valueFrom:
                 configMapKeyRef:
                   key: AM_SS_PASSWORD
-                  name: env
+                  name: archivematica-settings
             - name: AM_SS_API_KEY
               valueFrom:
                 configMapKeyRef:
                   key: AM_SS_API_KEY
-                  name: env
+                  name: archivematica-settings
             - name: AM_SS_EMAIL
               valueFrom:
                 configMapKeyRef:
@@ -499,7 +502,10 @@ spec:
             runAsGroup: {{ .Values.general.user_uid }}
           env:               
             - name: DJANGO_SECRET_KEY
-              value: "12345"
+              valueFrom:
+                configMapKeyRef:
+                  key: DJANGO_SECRET_KEY
+                  name: archivematica-settings
             - name: DJANGO_SETTINGS_MODULE
               value: settings.common
             - name: ARCHIVEMATICA_MCPCLIENT_EMAIL_BACKEND

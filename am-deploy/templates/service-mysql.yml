@@ -34,12 +34,15 @@ spec:
       containers:
         - name: mysql
           image: bitnami/mysql:5.7
+          envFrom:
+            - secretRef:
+                name: archivematica-settings 
           env:
             - name: MYSQL_ROOT_PASSWORD
               valueFrom:
                 configMapKeyRef:
                   key: MYSQL_ROOT_PASSWORD
-                  name: env
+                  name: archivematica-settings
             - name: MYSQL_DATABASE
               valueFrom:
                 configMapKeyRef:
