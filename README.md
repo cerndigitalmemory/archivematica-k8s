@@ -51,6 +51,15 @@ oc create secret generic \
   archivematica-settings
 ```
 
+Set up the credentials to mount EOS:
+
+```
+oc create secret generic 
+  --from-literal="KEYTAB_USER=<USERNAME>"
+  --from-literal="KEYTAB_PWD=<PASSWORD>"
+  eos-credentials 
+```
+
 Note that two different users are created for the dashboard and the storage service.
 
 ## Docker images
@@ -88,24 +97,6 @@ Pushing to openshift creates the following deployments with the following contai
 | es                       | 1        | ELasticsearch                                        |
 | mysql                    | 1        | MySQL                                                |
 | redis                    | 1        | Redis                                                |
-
-* **archivematica-all:**
-    * **Storage Service:** The Archivematica Storage Service is a standalone web application that handles moving files to Archivematica for processing, from Archivematica into long term storage, and keeps track of their location for later retrieval.
-    * **Dashboard:** The dashboard manages a pipeline’s behaviour. It provides a view into the status of units, allows workflow decisions to be made, handles configuration, allows arrangement & description, and customization of the FPR. 
-    * **MCP Server:** The MCP Server is the core of the Archivematica system. It controls the various micro-services in the Archivematica system. Configuration and processing information are held in the database. The user monitors and controls the status & workflow via the dashboard . The MCP Server maintains a log of all completed work in the database and log files. 
-    * **ClamAV:** ClamAV is an open source antivirus engine for detecting trojans, viruses, malware & other malicious threats. 
-    * **Fits:** FITS is a free and open source tool for identifying and validating file formats, extracting metadata embedded within files, and outputting the metadata in various formats. It was created to do some of the file processing tasks needed to support digital preservation repositories and applications.  
-
-* **mcp-client:** Archivematica has one or more MCPClient instances to perform the actual work. They are gearman worker implementations that inform the gearman server what tasks they can perform, and wait for the server to assign them a task. When a client starts, it connects to the specified gearman server and provides a list of modules they support. MCP Client is seperate from the rest services because in this way it can be easily scaled up or down to increase performance. 
-
-* **gearman:** Gearman workers receive tasks from MCPServer and assign them to the MCPClient.
-
-* **es:** Elasticsearch container used for indexing and searching.
-
-* **mysql:** Database container used to store data.
-
-* **redis:** Redis container.
-
 
 
 ## References
