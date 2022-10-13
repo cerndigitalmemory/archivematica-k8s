@@ -152,7 +152,7 @@ spec:
           env:            
             - name: DJANGO_SECRET_KEY
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   key: DJANGO_SECRET_KEY
                   name: archivematica-settings
             - name: DJANGO_SETTINGS_MODULE
@@ -332,17 +332,17 @@ spec:
                   name: env
             - name: AM_SS_USERNAME
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   key: AM_SS_USERNAME
                   name: archivematica-settings
             - name: AM_SS_PASSWORD
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   key: AM_SS_PASSWORD
                   name: archivematica-settings
             - name: AM_SS_API_KEY
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   key: AM_SS_API_KEY
                   name: archivematica-settings
             - name: AM_SS_EMAIL
@@ -503,7 +503,7 @@ spec:
           env:               
             - name: DJANGO_SECRET_KEY
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   key: DJANGO_SECRET_KEY
                   name: archivematica-settings
             - name: DJANGO_SETTINGS_MODULE

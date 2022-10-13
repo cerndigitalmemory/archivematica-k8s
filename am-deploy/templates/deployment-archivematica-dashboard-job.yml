@@ -30,12 +30,12 @@ spec:
               value: auto
             - name: AM_DASHBOARD_USERNAME
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   key: AM_DASHBOARD_USERNAME
                   name: archivematica-settings
             - name: AM_DASHBOARD_PASSWORD
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   key: AM_DASHBOARD_PASSWORD
                   name: archivematica-settings
             - name: AM_DASHBOARD_EMAIL
@@ -60,12 +60,12 @@ spec:
                   name: env
             - name: AM_SS_USERNAME
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   key: AM_SS_USERNAME
                   name: archivematica-settings
             - name: AM_SS_API_KEY
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   key: AM_SS_API_KEY
                   name: archivematica-settings
             - name: AM_DASHBOARD_SITE_URL

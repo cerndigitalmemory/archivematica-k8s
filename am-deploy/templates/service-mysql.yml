@@ -40,7 +40,7 @@ spec:
           env:
             - name: MYSQL_ROOT_PASSWORD
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   key: MYSQL_ROOT_PASSWORD
                   name: archivematica-settings
             - name: MYSQL_DATABASE
