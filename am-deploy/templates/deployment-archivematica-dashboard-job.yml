@@ -4,14 +4,14 @@ metadata:
   name: archivematica-dashboard-init-job
   namespace: {{ .Release.Namespace }}
 spec:
-  backoffLimit: 1
+  backoffLimit: 5
   template:
     spec:
       containers:
         - image:  {{ .Values.archivematica_dashboard.image }}
           name: archivematica-dashboard-create-superuser          
           command: ["sh"]
-          args: ["-c","python /src/dashboard/src/manage.py install --username=$(AM_DASHBOARD_USERNAME) --password=$(AM_DASHBOARD_PASSWORD) --email=$(AM_DASHBOARD_EMAIL) --org-name=$(AM_DASHBOARD_ORG_NAME) --org-id=$(AM_DASHBOARD_ORG_ID) --api-key=$(AM_DASHBOARD_API_KEY) --ss-url=$(AM_SS_URL) --ss-user=$(AM_SS_USERNAME) --ss-api-key=$(AM_SS_API_KEY) --site-url=$(AM_DASHBOARD_SITE_URL)"]
+          args: ["-c","python /src/dashboard/src/manage.py install --username=$(AM_DASHBOARD_USERNAME) --password=$(AM_DASHBOARD_PASSWORD) --email=$(AM_DASHBOARD_EMAIL) --org-name=$(AM_DASHBOARD_ORG_NAME) --org-id=$(AM_DASHBOARD_ORG_ID) --api-key=$(AM_DASHBOARD_API_KEY) --ss-url=$(AM_SS_URL_HTTP) --ss-user=$(AM_SS_USERNAME) --ss-api-key=$(AM_SS_API_KEY) --site-url=$(AM_DASHBOARD_SITE_URL)"]
           envFrom:
             - secretRef:
                 name: archivematica-settings 
@@ -30,14 +30,14 @@ spec:
               value: auto
             - name: AM_DASHBOARD_USERNAME
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   key: AM_DASHBOARD_USERNAME
-                  name: env
+                  name: archivematica-settings
             - name: AM_DASHBOARD_PASSWORD
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   key: AM_DASHBOARD_PASSWORD
-                  name: env
+                  name: archivematica-settings
             - name: AM_DASHBOARD_EMAIL
               valueFrom:
                 configMapKeyRef:
@@ -53,38 +53,48 @@ spec:
                 configMapKeyRef:
                   key: AM_DASHBOARD_ORG_ID
                   name: env
-            - name: AM_SS_URL
+            - name: AM_SS_URL_HTTP
               valueFrom:
                 configMapKeyRef:
-                  key: AM_SS_URL
+                  key: AM_SS_URL_HTTP
                   name: env
             - name: AM_SS_USERNAME
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   key: AM_SS_USERNAME
-                  name: env
+                  name: archivematica-settings
             - name: AM_SS_API_KEY
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   key: AM_SS_API_KEY
-                  name: env
+                  name: archivematica-settings
+            - name: AM_DASHBOARD_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: AM_DASHBOARD_API_KEY
+                  name: archivematica-settings
             - name: AM_DASHBOARD_SITE_URL
               valueFrom:
                 configMapKeyRef:
                   key: AM_DASHBOARD_SITE_URL
+                  name: env
+            - name: SS_DB_URL
+              valueFrom:
+                configMapKeyRef:
+                  key: SS_DB_URL
                   name: env
             - name: ARCHIVEMATICA_DASHBOARD_EMAIL_PORT
               value: "587"
             - name: ARCHIVEMATICA_DASHBOARD_CLIENT_PORT
               value: "3306"
             - name: ARCHIVEMATICA_DASHBOARD_CLIENT_DATABASE
-              value: "MCP"
+              value: MCP
             - name: ARCHIVEMATICA_DASHBOARD_CLIENT_HOST
               value: mysql
             - name: ARCHIVEMATICA_DASHBOARD_CLIENT_USER
               value: archivematica
             - name: ARCHIVEMATICA_DASHBOARD_CLIENT_PASSWORD
-              value: demo
+              value: archivematica
             - name: ARCHIVEMATICA_DASHBOARD_DASHBOARD_SEARCH_ENABLED
               value: "false"
       restartPolicy: OnFailure

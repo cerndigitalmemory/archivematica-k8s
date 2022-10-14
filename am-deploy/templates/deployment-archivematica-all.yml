@@ -29,6 +29,8 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Namespace }}
         app.kubernetes.io/version: test    
         app.kubernetes.io/managed-by: helm
+      annotations:
+        eos.okd.cern.ch/mount-eos-with-credentials-from-secret: "eos-credentials"
     spec:
       securityContext:
         fsGroup: {{ .Values.general.user_uid }}
@@ -120,13 +122,13 @@ spec:
             - name: ARCHIVEMATICA_DASHBOARD_CLIENT_PORT
               value: "3306"
             - name: ARCHIVEMATICA_DASHBOARD_CLIENT_DATABASE
-              value: "MCP"
+              value: MCP
             - name: ARCHIVEMATICA_DASHBOARD_CLIENT_HOST
               value: mysql
             - name: ARCHIVEMATICA_DASHBOARD_CLIENT_USER
               value: archivematica
             - name: ARCHIVEMATICA_DASHBOARD_CLIENT_PASSWORD
-              value: demo
+              value: archivematica
             - name: ARCHIVEMATICA_DASHBOARD_DASHBOARD_ELASTICSEARCH_SERVER
               value: "es:9200"
             - name: ARCHIVEMATICA_DASHBOARD_DASHBOARD_GEARMAN_SERVER
@@ -142,77 +144,6 @@ spec:
             - mountPath: /home/transfer
               name: {{ .Release.Namespace }}-transfer-share
 
-        - image: {{ .Values.mcp_client.image }}
-          name: archivematica-mcp-client
-          securityContext:
-            runAsUser: {{ .Values.general.user_uid }}
-            runAsGroup: {{ .Values.general.user_uid }}
-          env:      
-            - name: ARCHIVEMATICA_MCPCLIENT_MCPCLIENT_CAPTURE_CLIENT_SCRIPT_OUTPUT
-              value: "true"           
-            - name: DJANGO_SECRET_KEY
-              value: "12345"
-            - name: DJANGO_SETTINGS_MODULE
-              value: settings.common
-            - name: ARCHIVEMATICA_MCPCLIENT_EMAIL_BACKEND
-              value: "django.core.mail.backends.smtp.EmailBackend"
-            - name: ARCHIVEMATICA_MCPCLIENT_EMAIL_HOST
-              value: "smtp.sendgrid.net"
-            - name: ARCHIVEMATICA_MCPCLIENT_EMAIL_PORT
-              value: "587"
-            # - name: ARCHIVEMATICA_MCPCLIENT_EMAIL_HOST_USER
-            #   value: '#{EMAIL_USER}#'
-            # - name: ARCHIVEMATICA_MCPCLIENT_EMAIL_HOST_PASSWORD
-            #   value: '#{EMAIL_PASSWORD}#'
-            # - name: ARCHIVEMATICA_MCPCLIENT_EMAIL_DEFAULT_FROM_EMAIL
-            #   value: "am-reports@piqlconnect.com"
-            # - name: ARCHIVEMATICA_MCPCLIENT_EMAIL_SUBJECT_PREFIX
-            #   value: '#{EMAIL_SUBJECT_PREFIX}#'
-            - name: ARCHIVEMATICA_MCPCLIENT_CLIENT_USER
-              value: archivematica
-            - name: ARCHIVEMATICA_MCPCLIENT_CLIENT_PASSWORD
-              value: demo
-            - name: ARCHIVEMATICA_MCPCLIENT_CLIENT_HOST
-              value: mysql
-            - name: ARCHIVEMATICA_MCPCLIENT_CLIENT_DATABASE
-              value: "MCP"
-            - name: ARCHIVEMATICA_MCPCLIENT_MCPCLIENT_ELASTICSEARCHSERVER
-              value: "es:9200"
-            - name: ARCHIVEMATICA_MCPCLIENT_MCPCLIENT_MCPARCHIVEMATICASERVER
-              value: "archivematica-gearmand:4730"
-            - name: ARCHIVEMATICA_MCPCLIENT_MCPCLIENT_SEARCH_ENABLED
-              value: "false" # import from values
-            - name: ARCHIVEMATICA_MCPCLIENT_MCPCLIENT_CAPTURE_CLIENT_SCRIPT_OUTPUT
-              value: "true" # import from values
-            - name: ARCHIVEMATICA_MCPCLIENT_MCPCLIENT_CLAMAV_SERVER
-              value: "clamavd:3310"
-            - name: ARCHIVEMATICA_MCPCLIENT_MCPCLIENT_CLAMAV_CLIENT_MAX_FILE_SIZE
-              valueFrom:
-                configMapKeyRef:
-                  key: CLAMAV_MAX_FILE_SIZE
-                  name: env
-            - name: ARCHIVEMATICA_MCPCLIENT_MCPCLIENT_CLAMAV_CLIENT_MAX_SCAN_SIZE
-              valueFrom:
-                configMapKeyRef:
-                  key: CLAMAV_MAX_SCAN_SIZE
-                  name: env
-            - name: ARCHIVEMATICA_MCPCLIENT_MCPCLIENT_CLAMAV_CLIENT_MAX_STREAM_LENGTH
-              valueFrom:
-                configMapKeyRef:
-                  key: CLAMAV_MAX_STREAM_LENGTH
-                  name: env
-            - name: ARCHIVEMATICA_MCPCLIENT_MCPCLIENT_CLAMAV_CLIENT_BACKEND
-              value: clamscanner   
-          envFrom:
-            - secretRef:
-                name: archivematica-settings       
-          resources: 
-          volumeMounts:
-            - mountPath: /var/archivematica/sharedDirectory
-              name: {{ .Release.Namespace }}-pipeline-data
-            - mountPath: /home/transfer
-              name: {{ .Release.Namespace }}-transfer-share
-
         - image: {{ .Values.mcp_server.image }}
           name: archivematica-mcp-server
           securityContext:
@@ -220,17 +151,20 @@ spec:
             runAsGroup: {{ .Values.general.user_uid }}     
           env:            
             - name: DJANGO_SECRET_KEY
-              value: "12345"
+              valueFrom:
+                secretKeyRef:
+                  key: DJANGO_SECRET_KEY
+                  name: archivematica-settings
             - name: DJANGO_SETTINGS_MODULE
               value: settings.common
             - name: ARCHIVEMATICA_MCPSERVER_CLIENT_USER
               value: archivematica
             - name: ARCHIVEMATICA_MCPSERVER_CLIENT_PASSWORD
-              value: demo
+              value: archivematica
             - name: ARCHIVEMATICA_MCPSERVER_CLIENT_HOST
               value: mysql
             - name: ARCHIVEMATICA_MCPSERVER_CLIENT_DATABASE
-              value: "MCP"
+              value: MCP
             - name: ARCHIVEMATICA_MCPSERVER_MCPSERVER_MCPARCHIVEMATICASERVER
               value: "archivematica-gearmand:4730"
             - name: ARCHIVEMATICA_MCPSERVER_SEARCH_ENABLED
@@ -239,12 +173,12 @@ spec:
             - secretRef:
                 name: archivematica-settings   
           resources: 
-            # requests:
-            #   memory: "256Mi"
-            #   cpu: "1m"
-            # limits:
-            #   memory: "2048Mi"
-            #   cpu: "333m"
+            requests:
+              memory: "256Mi"
+              cpu: "1m"
+            limits:
+              memory: "2048Mi"
+              cpu: "333m"
           volumeMounts:          
             - mountPath: /var/archivematica/sharedDirectory
               name: {{ .Release.Namespace }}-pipeline-data
@@ -290,24 +224,21 @@ spec:
             - mountPath: /run
               name: {{ .Release.Namespace }}-clamav-log
 
-
-
         - image: artefactual/fits-ngserver:0.8.4
           name: archivematica-fits
           ports:
             - containerPort: 2113
-          # resources:
-          #   requests:
-          #     memory: "256Mi"
-          #     cpu: "1m"
-          #   limits:
-          #     memory: "2048Mi"
-          #     cpu: "0m"
+          resources: 
+            requests:
+              memory: "256Mi"
+              cpu: "1m"
+            limits:
+              memory: "2048Mi"
+              cpu: "333m"
           volumeMounts:
             - mountPath: /var/archivematica/sharedDirectory
               name: {{ .Release.Namespace }}-pipeline-data
             
-
       initContainers:
         - image:  {{ .Values.archivematica_storage_service.image }}
           name: archivematica-storage-service-migrations
@@ -401,19 +332,19 @@ spec:
                   name: env
             - name: AM_SS_USERNAME
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   key: AM_SS_USERNAME
-                  name: env
+                  name: archivematica-settings
             - name: AM_SS_PASSWORD
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   key: AM_SS_PASSWORD
-                  name: env
+                  name: archivematica-settings
             - name: AM_SS_API_KEY
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   key: AM_SS_API_KEY
-                  name: env
+                  name: archivematica-settings
             - name: AM_SS_EMAIL
               valueFrom:
                 configMapKeyRef:
@@ -453,13 +384,13 @@ spec:
             - name: ARCHIVEMATICA_DASHBOARD_CLIENT_PORT
               value: "3306"
             - name: ARCHIVEMATICA_DASHBOARD_CLIENT_DATABASE
-              value: "MCP"
+              value: MCP
             - name: ARCHIVEMATICA_DASHBOARD_CLIENT_HOST
               value: mysql
             - name: ARCHIVEMATICA_DASHBOARD_CLIENT_USER
               value: archivematica
             - name: ARCHIVEMATICA_DASHBOARD_CLIENT_PASSWORD
-              value: demo
+              value: archivematica
       restartPolicy: Always
       nodeSelector:
         kubernetes.io/os: linux  
@@ -531,7 +462,137 @@ spec:
           emptyDir: {}
           {{- end }}
         {{- end }}
-        
+---
+# Seperate deployment for mcp-client so it can have multiple replicas
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: archivematica-mcp-client
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: archivematica-mcp-client
+      app.kubernetes.io/instance: {{ .Release.Namespace }}
+      app.kubernetes.io/managed-by: helm    
+  strategy:
+    type: Recreate
+  template:
+    metadata:     
+      labels:
+        app.kubernetes.io/name: archivematica-mcp-client
+        app.kubernetes.io/instance: {{ .Release.Namespace }}
+        app.kubernetes.io/version: test    
+        app.kubernetes.io/managed-by: helm
+      annotations:
+        eos.okd.cern.ch/mount-eos-with-credentials-from-secret: "eos-credentials"
+    spec:
+    
+      securityContext:
+        fsGroup: {{ .Values.general.user_uid }}
+        fsGroupChangePolicy: "OnRootMismatch"
+      serviceAccount: default
+      serviceAccountName: default
+      containers:
+        - image: {{ .Values.mcp_client.image }}
+          name: archivematica-mcp-client
+          securityContext:
+            runAsUser: {{ .Values.general.user_uid }}
+            runAsGroup: {{ .Values.general.user_uid }}
+          env:               
+            - name: DJANGO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: DJANGO_SECRET_KEY
+                  name: archivematica-settings
+            - name: DJANGO_SETTINGS_MODULE
+              value: settings.common
+            - name: ARCHIVEMATICA_MCPCLIENT_EMAIL_BACKEND
+              value: "django.core.mail.backends.smtp.EmailBackend"
+            - name: ARCHIVEMATICA_MCPCLIENT_EMAIL_HOST
+              value: "smtp.sendgrid.net"
+            - name: ARCHIVEMATICA_MCPCLIENT_EMAIL_PORT
+              value: "587"
+            # - name: ARCHIVEMATICA_MCPCLIENT_EMAIL_HOST_USER
+            #   value: '#{EMAIL_USER}#'
+            # - name: ARCHIVEMATICA_MCPCLIENT_EMAIL_HOST_PASSWORD
+            #   value: '#{EMAIL_PASSWORD}#'
+            # - name: ARCHIVEMATICA_MCPCLIENT_EMAIL_DEFAULT_FROM_EMAIL
+            #   value: "am-reports@piqlconnect.com"
+            # - name: ARCHIVEMATICA_MCPCLIENT_EMAIL_SUBJECT_PREFIX
+            #   value: '#{EMAIL_SUBJECT_PREFIX}#'
+            - name: ARCHIVEMATICA_MCPCLIENT_CLIENT_USER
+              value: archivematica
+            - name: ARCHIVEMATICA_MCPCLIENT_CLIENT_PASSWORD
+              value: archivematica
+            - name: ARCHIVEMATICA_MCPCLIENT_CLIENT_HOST
+              value: mysql
+            - name: ARCHIVEMATICA_MCPCLIENT_CLIENT_DATABASE
+              value: MCP
+            - name: ARCHIVEMATICA_MCPCLIENT_MCPCLIENT_ELASTICSEARCHSERVER
+              value: "es:9200"
+            - name: ARCHIVEMATICA_MCPCLIENT_MCPCLIENT_MCPARCHIVEMATICASERVER
+              value: "archivematica-gearmand:4730"
+            - name: ARCHIVEMATICA_MCPCLIENT_MCPCLIENT_SEARCH_ENABLED
+              value: "false" # import from values
+            - name: ARCHIVEMATICA_MCPCLIENT_MCPCLIENT_CAPTURE_CLIENT_SCRIPT_OUTPUT
+              value: "true" # import from values 
+            - name: ARCHIVEMATICA_MCPCLIENT_MCPCLIENT_CLAMAV_PASS_BY_STREAM
+              value: "false"
+            - name: ARCHIVEMATICA_MCPCLIENT_MCPCLIENT_CLAMAV_SERVER
+              value: archivematica-clamavd:3310
+            - name: ARCHIVEMATICA_MCPCLIENT_MCPCLIENT_CLAMAV_CLIENT_MAX_FILE_SIZE
+              valueFrom:
+                configMapKeyRef:
+                  key: CLAMAV_MAX_FILE_SIZE
+                  name: env
+            - name: ARCHIVEMATICA_MCPCLIENT_MCPCLIENT_CLAMAV_CLIENT_MAX_SCAN_SIZE
+              valueFrom:
+                configMapKeyRef:
+                  key: CLAMAV_MAX_SCAN_SIZE
+                  name: env
+            - name: ARCHIVEMATICA_MCPCLIENT_MCPCLIENT_CLAMAV_CLIENT_MAX_STREAM_LENGTH
+              valueFrom:
+                configMapKeyRef:
+                  key: CLAMAV_MAX_STREAM_LENGTH
+                  name: env
+            - name: ARCHIVEMATICA_MCPCLIENT_MCPCLIENT_CLAMAV_CLIENT_BACKEND
+              value: clamdscanner  
+
+          envFrom:
+            - secretRef:
+                name: archivematica-settings       
+          resources: 
+            requests:
+              memory: "256Mi"
+              cpu: "1m"
+            limits:
+              memory: "2048Mi"
+              cpu: "1000m" 
+          volumeMounts:
+            - mountPath: /var/archivematica/sharedDirectory
+              name: {{ .Release.Namespace }}-pipeline-data
+            - mountPath: /home/transfer
+              name: {{ .Release.Namespace }}-transfer-share
+      restartPolicy: Always
+      nodeSelector:
+        kubernetes.io/os: linux       
+      volumes:      
+        - name: {{ .Release.Namespace }}-pipeline-data
+          {{- if .Values.archivematica_storage_service.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ .Release.Namespace }}-pipeline-data       
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        - name: {{ .Release.Namespace }}-transfer-share
+          {{- if .Values.archivematica_storage_service.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: transfer-share
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
 ---
 apiVersion: v1
 kind: Service
@@ -614,7 +675,7 @@ spec:
     protocol: TCP
     targetPort: 8000 
   selector:
-    app.kubernetes.io/name: archivematica-all
+    app.kubernetes.io/name: archivematica-mcp-client
     app.kubernetes.io/instance: {{ .Release.Namespace }}
     app.kubernetes.io/version: test    
     app.kubernetes.io/managed-by: helm
@@ -820,4 +881,24 @@ spec:
     requests:
       storage: {{ .Values.archivematica_storage_service.persistence.size }}
   storageClassName: cephfs-ssd
+{{- end }}
+---
+{{- if .Values.archivematica_storage_service.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: eos-volume
+  annotations:
+    "helm.sh/resource-policy": keep
+    volume.beta.kubernetes.io/storage-provisioner: eos-volume-provisioner.webservices.cern.ch
+spec:
+  accessModes:
+    - ReadWriteOnce
+    - ReadWriteMany
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: {{ .Values.archivematica_storage_service.persistence.size }}
+  storageClassName: eos
+  volumeMode: Filesystem
 {{- end }}

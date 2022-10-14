@@ -29,18 +29,11 @@ Most of the configuration values can be set in `values.yaml`. Depending on your 
 | Value             | Description                                               |
 | ----------------- | --------------------------------------------------------- |
 | route/hostname    | Hostname for the Dashboard                                |
-| route/hostname_ss | Hostname for the Storage Service                          |
+| route/ss_hostname | Hostname for the Storage Service                          |
 | general/user_uid  | Pick this based on your OpenShift project's allowed range |
 
 Example values for hostname on CERN Openshift are `<NAME>.web.cern.ch`.
 
-### MySQL workaround
-
-If the last init pod fails: open the mysql pod terminal and run `mysql -uroot -p` (login with the MySQL root password you set in the secrets), then execute this query:
-
-```sql
-CREATE USER 'root'@'%' IDENTIFIED BY '12345a'; GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '12345a'; GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION; FLUSH PRIVILEGES; CREATE DATABASE IF NOT EXISTS archivematica_db; CREATE USER 'archivematica'@'%' IDENTIFIED BY 'demo'; CREATE DATABASE IF NOT EXISTS MCP; GRANT ALL PRIVILEGES ON MCP.* TO 'archivematica'@'%' WITH GRANT OPTION; FLUSH PRIVILEGES;
-```
 
 ### Secrets
 
@@ -48,9 +41,27 @@ Some other values need to be set as secrets in the OpenShift project:
 
 ```
 oc create secret generic \
-  --from-literal="MYSQL_ROOT_PASSWORD=12345" \
+  --from-literal="MYSQL_ROOT_PASSWORD=<VALUE>" \
+  --from-literal="AM_DASHBOARD_USERNAME=<VALUE>" \
+  --from-literal="AM_DASHBOARD_PASSWORD=<VALUE>" \
+  --from-literal="AM_DASHBOARD_API_KEY=<VALUE>" \
+  --from-literal="AM_SS_USERNAME=<VALUE>" \
+  --from-literal="AM_SS_PASSWORD=<VALUE>" \
+  --from-literal="AM_SS_API_KEY=<VALUE>" \
+  --from-literal="DJANGO_SECRET_KEY=<VALUE>" \
   archivematica-settings
 ```
+
+Set up the credentials to mount EOS:
+
+```
+oc create secret generic 
+  --from-literal="KEYTAB_USER=<USERNAME>"
+  --from-literal="KEYTAB_PWD=<PASSWORD>"
+  eos-credentials 
+```
+
+Note that two different users are created for the dashboard and the storage service.
 
 ## Docker images
 
@@ -73,6 +84,21 @@ If you wish to build them yourself, here's a quick overview:
 | am-clamav                     | images/clamav/Dockerfile                     | images/clamav                      |
 
 In this case, replace the `image` values in the `values.yaml`.
+
+### Deployment
+
+Pushing to openshift creates the following deployments with the following containers
+
+| Deployment               | Replicas | Containers                                           |
+|--------------------------|----------|------------------------------------------------------|
+| archivematica-all        | 1        | Storage Service, Dashboard, MCP Server, ClamAV, Fits |
+| archivematica-gearmand   | 1        | Gearman                                              |
+| archivematica-mcp-client | 2+       | MCP Client                                           |
+| archivematica-redis      | 1        | Redis                                                |
+| es                       | 1        | ELasticsearch                                        |
+| mysql                    | 1        | MySQL                                                |
+| redis                    | 1        | Redis                                                |
+
 
 ## References
 
