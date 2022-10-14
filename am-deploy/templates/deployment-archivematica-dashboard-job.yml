@@ -68,6 +68,11 @@ spec:
                 secretKeyRef:
                   key: AM_SS_API_KEY
                   name: archivematica-settings
+            - name: AM_DASHBOARD_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: AM_DASHBOARD_API_KEY
+                  name: archivematica-settings
             - name: AM_DASHBOARD_SITE_URL
               valueFrom:
                 configMapKeyRef:

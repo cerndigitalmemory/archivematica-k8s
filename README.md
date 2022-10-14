@@ -41,13 +41,14 @@ Some other values need to be set as secrets in the OpenShift project:
 
 ```
 oc create secret generic \
-  --from-literal="MYSQL_ROOT_PASSWORD=<value>" \
-  --from-literal="AM_DASHBOARD_USERNAME=<value>" \
-  --from-literal="AM_DASHBOARD_PASSWORD=<value>" \
-  --from-literal="AM_SS_USERNAME=<value>" \
-  --from-literal="AM_SS_PASSWORD=<value>" \
-  --from-literal="AM_SS_API_KEY=<value>" \
-  --from-literal="DJANGO_SECRET_KEY=<value>" \
+  --from-literal="MYSQL_ROOT_PASSWORD=<VALUE>" \
+  --from-literal="AM_DASHBOARD_USERNAME=<VALUE>" \
+  --from-literal="AM_DASHBOARD_PASSWORD=<VALUE>" \
+  --from-literal="AM_DASHBOARD_API_KEY=<VALUE>" \
+  --from-literal="AM_SS_USERNAME=<VALUE>" \
+  --from-literal="AM_SS_PASSWORD=<VALUE>" \
+  --from-literal="AM_SS_API_KEY=<VALUE>" \
+  --from-literal="DJANGO_SECRET_KEY=<VALUE>" \
   archivematica-settings
 ```
 
